@@ -3,21 +3,53 @@ import pandas as pd
 import pdfplumber
 import pytesseract
 from PIL import Image
-import re
 import spacy
 
-# -------------------- PAGE CONFIG --------------------
+# ================= PAGE CONFIG =================
 st.set_page_config(
-    page_title="MyDiet_AI",
-    page_icon="🍎",
-    layout="centered"
+    page_title="MyDiet",
+    page_icon="🥗",
+    layout="wide"
 )
 
-st.title("🍎 MyDiet_AI")
-st.caption("AI-based Personalized Diet Recommendation System")
+# ================= LIGHT THEME STYLES =================
+st.markdown(
+    """
+    <style>
+    .main {background-color:#f8fafc;}
+    h1, h2, h3 {color:#0f172a;}
+    .card {
+        background:#ffffff;
+        padding:24px;
+        border-radius:18px;
+        box-shadow:0 8px 24px rgba(15,23,42,0.08);
+        margin-bottom:24px;
+        border:1px solid #e5e7eb;
+    }
+    .accent {
+        background:linear-gradient(90deg,#22c55e,#3b82f6);
+        padding:12px 20px;
+        border-radius:12px;
+        color:white;
+        font-weight:600;
+        text-align:center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ================= HEADER =================
+col1, col2 = st.columns([1,5])
+with col1:
+    st.image("https://cdn-icons-png.flaticon.com/512/2927/2927347.png", width=70)
+with col2:
+    st.markdown("## MyDiet")
+    st.caption("Personalized Nutrition & Diet Recommendation System")
+
 st.markdown("---")
 
-# -------------------- LOAD NLP SAFELY --------------------
+# ================= NLP =================
 @st.cache_resource
 def load_spacy():
     nlp = spacy.blank("en")
@@ -26,124 +58,79 @@ def load_spacy():
 
 nlp = load_spacy()
 
-# -------------------- TEXT EXTRACTION (MILESTONE 1) --------------------
+# ================= TEXT EXTRACTION =================
 def extract_text(uploaded_file):
-    ext = uploaded_file.name.split(".")[-1].lower()
+    ext = uploaded_file.name.split('.')[-1].lower()
     text = ""
 
     if ext == "pdf":
         with pdfplumber.open(uploaded_file) as pdf:
             for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n"
+                if page.extract_text():
+                    text += page.extract_text() + "\n"
 
     elif ext in ["png", "jpg", "jpeg"]:
         try:
             img = Image.open(uploaded_file)
             text = pytesseract.image_to_string(img)
         except Exception:
-            text = (
-                "⚠️ Image OCR is not supported in this deployment environment.\n"
-                "Please upload PDF / TXT / CSV files or paste text manually."
-            )
+            text = "OCR not supported in this environment"
 
     elif ext == "txt":
         text = uploaded_file.read().decode("utf-8")
 
     elif ext == "csv":
         df = pd.read_csv(uploaded_file)
-        if "doctor_prescription" in df.columns:
-            text = df["doctor_prescription"].iloc[0]
-        else:
-            text = "⚠️ CSV file does not contain 'doctor_prescription' column."
+        text = df.iloc[0].astype(str).str.cat(sep=" ")
 
-    return text.strip()
+    return text
 
-
-# -------------------- NLP + DIET LOGIC (MILESTONE 3) --------------------
+# ================= DIET ENGINE =================
 def generate_diet(text):
-    diet = {
-        "condition": [],
-        "allowed_foods": ["vegetables", "whole grains", "fruits"],
-        "restricted_foods": [],
-        "diet_plan": [],
-        "lifestyle_advice": []
-    }
-
     text = text.lower()
+    diet = {
+        "condition": "General Wellness",
+        "allowed_foods": ["vegetables", "fruits", "whole grains"],
+        "restricted_foods": [],
+        "recommendation": "Maintain balanced meals and daily activity"
+    }
 
     if "diabetes" in text:
-        diet["condition"].append("Diabetes")
-        diet["restricted_foods"].append("sugar")
-        diet["diet_plan"].append("Follow a diabetic-friendly low sugar diet.")
-        diet["lifestyle_advice"].append("Walk daily for 30 minutes.")
+        diet.update({
+            "condition": "Diabetes",
+            "restricted_foods": ["sugar", "refined carbs"],
+            "recommendation": "Low‑GI diet with controlled carbohydrates"
+        })
 
     if "cholesterol" in text:
-        diet["condition"].append("High Cholesterol")
-        diet["restricted_foods"].append("oily food")
-        diet["diet_plan"].append("Increase fiber intake and avoid fried foods.")
+        diet["restricted_foods"].append("fried foods")
 
-    if "blood pressure" in text or "hypertension" in text:
-        diet["condition"].append("Hypertension")
-        diet["restricted_foods"].append("salt")
-        diet["diet_plan"].append("Reduce sodium intake.")
-        diet["lifestyle_advice"].append("Practice stress management.")
+    if "hypertension" in text or "blood pressure" in text:
+        diet["restricted_foods"].append("excess salt")
 
-    if not diet["condition"]:
-        diet["condition"].append("General Health")
-        diet["diet_plan"].append("Maintain a balanced diet.")
-        diet["lifestyle_advice"].append("Stay active and hydrated.")
+    return diet
 
-    return {
-        "condition": ", ".join(diet["condition"]),
-        "allowed_foods": list(set(diet["allowed_foods"])),
-        "restricted_foods": list(set(diet["restricted_foods"])),
-        "diet_plan": " ".join(diet["diet_plan"]),
-        "lifestyle_advice": " ".join(diet["lifestyle_advice"])
-    }
+# ================= UI LAYOUT =================
+st.markdown('<div class="accent">Upload your medical report to receive a personalized diet plan</div>', unsafe_allow_html=True)
 
-# -------------------- USER INPUT UI --------------------
-st.subheader("📄 Upload Medical Report")
+left, right = st.columns([2,3])
 
-uploaded_file = st.file_uploader(
-    "Upload PDF / Image / TXT / CSV",
-    type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
-)
+with left:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("📄 Medical Report Input")
+    uploaded_file = st.file_uploader("Upload PDF / Image / TXT / CSV", type=["pdf","png","jpg","jpeg","txt","csv"])
+    manual_text = st.text_area("Or paste medical / prescription text", height=160)
+    run = st.button("🍽️ Generate Diet Plan")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-manual_text = st.text_area(
-    "OR paste doctor prescription text",
-    height=150
-)
-
-process_btn = st.button("🔍 Generate Diet Recommendation")
-
-# -------------------- PIPELINE EXECUTION --------------------
-if process_btn:
-    if uploaded_file is None and manual_text.strip() == "":
-        st.warning("⚠️ Please upload a file or enter text.")
-    else:
-        st.success("✅ Processing input...")
-
-        if uploaded_file:
-            text = extract_text(uploaded_file)
-        else:
-            text = manual_text
-
-        st.subheader("📝 Extracted Text")
-        st.write(text[:1000])
-
-        st.subheader("🩺 Health Status")
-        st.info("Health condition inferred using medical text analysis.")
-
+with right:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("📊 Diet Recommendation Output")
+    if run:
+        text = extract_text(uploaded_file) if uploaded_file else manual_text
         diet = generate_diet(text)
-
-        st.subheader("🍽️ Personalized Diet Recommendation")
         st.json(diet)
-
-        st.download_button(
-            label="⬇️ Download Diet Plan (JSON)",
-            data=pd.Series(diet).to_json(),
-            file_name="diet_plan.json",
-            mime="application/json"
-        )
+        st.download_button("⬇️ Download as JSON", pd.Series(diet).to_json(), "diet_plan.json")
+    else:
+        st.info("Results will appear here after analysis")
+    st.markdown('</div>', unsafe_allow_html=True)
