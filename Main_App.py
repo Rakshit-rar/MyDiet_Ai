@@ -147,6 +147,3 @@ if process_btn:
             file_name="diet_plan.json",
             mime="application/json"
         )
-
-st.markdown("---")
-st.caption("© AI-NutriCare | End-to-End NLP-Based Diet Recommendation System")
