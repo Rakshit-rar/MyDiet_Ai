@@ -1,0 +1,8 @@
+[theme]
+base = "light"
+
+primaryColor = "#38BDF8"              # Sky blue buttons & highlights
+backgroundColor = "#F9FBFD"           # Very light background
+secondaryBackgroundColor = "#E8F4FD"  # Soft sky-blue cards
+textColor = "#0F172A"                 # Dark readable text
+font = "sans serif"
