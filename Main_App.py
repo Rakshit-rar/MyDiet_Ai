@@ -13,19 +13,8 @@ st.set_page_config(
     layout="centered"
 )
 
-# -------------------- HERO SECTION --------------------
-st.markdown(
-    """
-    <div style="text-align:center; padding: 1.5rem 0;">
-        <h1>🍎 MyDiet_AI</h1>
-        <p style="font-size:1.05rem; opacity:0.85;">
-            AI-based Personalized Diet Recommendation System
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
+st.title("🍎 MyDiet_AI")
+st.caption("AI-based Personalized Diet Recommendation System")
 st.markdown("---")
 
 # -------------------- LOAD NLP SAFELY --------------------
@@ -37,7 +26,7 @@ def load_spacy():
 
 nlp = load_spacy()
 
-# -------------------- TEXT EXTRACTION --------------------
+# -------------------- TEXT EXTRACTION (MILESTONE 1) --------------------
 def extract_text(uploaded_file):
     ext = uploaded_file.name.split(".")[-1].lower()
     text = ""
@@ -71,7 +60,8 @@ def extract_text(uploaded_file):
 
     return text.strip()
 
-# -------------------- DIET LOGIC --------------------
+
+# -------------------- NLP + DIET LOGIC (MILESTONE 3) --------------------
 def generate_diet(text):
     diet = {
         "condition": [],
@@ -113,20 +103,20 @@ def generate_diet(text):
         "lifestyle_advice": " ".join(diet["lifestyle_advice"])
     }
 
-# -------------------- INPUT SECTION --------------------
-st.subheader("📄 Medical Report")
+# -------------------- USER INPUT UI --------------------
+st.subheader("📄 Upload Medical Report")
+
 uploaded_file = st.file_uploader(
     "Upload PDF / Image / TXT / CSV",
     type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
 )
 
-st.subheader("👤 Patient Information")
-
+st.subheader("👤 Patient Attributes")
 col1, col2, col3 = st.columns(3)
 with col1:
-    gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"])
+    gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
 with col2:
-    activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"])
+    activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
 with col3:
     diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
 
@@ -134,34 +124,27 @@ col4, col5, col6 = st.columns(3)
 with col4:
     high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
 with col5:
-    bmi = st.number_input("BMI", 10.0, 60.0, 24.0, 0.1)
+    bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
 with col6:
-    total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", 100.0, 400.0, 180.0)
+    total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
 
 col7, col8 = st.columns(2)
 with col7:
-    glucose = st.number_input("Glucose (mg/dL)", 50.0, 300.0, 100.0)
+    glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
 with col8:
-    diet_type = st.selectbox("Diet Preference", ["Vegetarian", "Non-Vegetarian", "Vegan"])
+    diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
 
-intolerances = st.multiselect(
-    "Food Intolerances",
-    ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"]
-)
+intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
 
-with st.expander("📝 Doctor’s Prescription (Optional)"):
-    manual_text = st.text_area(
-        "Paste prescription text",
-        height=140
-    )
+exp = st.expander("Doctor's Prescription (optional)")
+with exp:
+    manual_text = st.text_area("Paste doctor prescription text here", height=150)
 
-st.markdown("---")
+process_btn = st.button("🔍 Generate Diet Recommendation")
 
-process_btn = st.button("🔍 Generate Personalized Diet", use_container_width=True)
-
-# -------------------- OUTPUT SECTION --------------------
+# -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    st.success("Processing patient data...")
+    st.success("✅ Processing input...")
 
     if uploaded_file:
         text = extract_text(uploaded_file)
@@ -173,25 +156,23 @@ if process_btn:
         tokens.append("diabetes")
     if high_cholesterol == "Yes" or total_cholesterol >= 200:
         tokens.append("cholesterol")
-
     if text.strip() == "" and tokens:
         text = " ".join(tokens)
 
-    st.subheader("📝 Extracted Medical Text")
-    st.write(text[:1000] if text else "No text provided.")
+    st.subheader("📝 Extracted Text")
+    st.write(text[:1000])
 
-    st.subheader("🩺 Health Analysis")
-    st.info("Health conditions inferred using medical text and patient inputs.")
+    st.subheader("🩺 Health Status")
+    st.info("Health condition inferred using medical text analysis.")
 
     diet = generate_diet(text)
 
-    st.subheader("🍽️ Diet Recommendation")
+    st.subheader("🍽️ Personalized Diet Recommendation")
     st.json(diet)
 
     st.download_button(
-        "⬇️ Download Diet Plan (JSON)",
+        label="⬇️ Download Diet Plan (JSON)",
         data=pd.Series(diet).to_json(),
         file_name="diet_plan.json",
-        mime="application/json",
-        use_container_width=True
+        mime="application/json"
     )
