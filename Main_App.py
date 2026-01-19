@@ -8,35 +8,14 @@ import spacy
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
-    page_title="Dummy_MyDiet_AI",
+    page_title="MyDiet_AI",
     page_icon="🍎",
     layout="centered"
 )
 
-st.markdown(
-    """
-    <style>
-    .stApp {background: linear-gradient(180deg, #f8fafc 0%, #ffffff 70%);}
-    .app-header {padding: 20px 24px; border-radius: 14px; background:#0f172a; color:#fff; margin-bottom: 8px;}
-    .app-header .brand {font-size: 24px; font-weight: 700; letter-spacing:.2px;}
-    .app-header .subtitle {margin-top:6px; opacity:.85}
-    .app-header .steps {display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
-    .app-header .step {background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); padding:8px 12px; border-radius:10px; font-size:14px;}
-    .app-footer {margin-top:32px; padding:14px; border-top:1px solid #e5e7eb; color:#64748b; text-align:center; font-size:13px;}
-    </style>
-    <div class="app-header">
-      <div class="brand">🍎 Dummy_MyDiet_AI</div>
-      <div class="subtitle">AI-based Personalized Diet Recommendation System</div>
-      <div class="steps">
-        <div class="step">1. Upload report or CSV (doctor_prescription)</div>
-        <div class="step">2. Set patient attributes</div>
-        <div class="step">3. Generate and download diet plan</div>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-st.divider()
+st.title("🍎 MyDiet_AI")
+st.caption("AI-based Personalized Diet Recommendation System")
+st.markdown("---")
 
 # -------------------- LOAD NLP SAFELY --------------------
 @st.cache_resource
@@ -161,8 +140,6 @@ exp = st.expander("Doctor's Prescription (optional)")
 with exp:
     manual_text = st.text_area("Paste doctor prescription text here", height=150)
 
-st.divider()
-
 process_btn = st.button("🔍 Generate Diet Recommendation")
 
 # -------------------- PIPELINE EXECUTION --------------------
@@ -199,12 +176,3 @@ if process_btn:
         file_name="diet_plan.json",
         mime="application/json"
     )
-
-st.markdown(
-    """
-    <div class="app-footer">
-      Built for demos and testing. Upload a doctor report or CSV with a doctor_prescription column to get a quick diet plan suggestion.
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
