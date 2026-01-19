@@ -8,12 +8,12 @@ import spacy
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
-    page_title="MyDiet_AI",
+    page_title="Dummy_MyDiet_AI",
     page_icon="🍎",
     layout="centered"
 )
 
-st.title("🍎 MyDiet_AI")
+st.title("🍎 Dummy_MyDiet_AI")
 st.caption("AI-based Personalized Diet Recommendation System")
 st.markdown("---")
 
@@ -111,39 +111,68 @@ uploaded_file = st.file_uploader(
     type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
 )
 
-manual_text = st.text_area(
-    "OR paste doctor prescription text",
-    height=150
-)
+st.subheader("👤 Patient Attributes")
+col1, col2, col3 = st.columns(3)
+with col1:
+    gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
+with col2:
+    activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
+with col3:
+    diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
+
+col4, col5, col6 = st.columns(3)
+with col4:
+    high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
+with col5:
+    bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
+with col6:
+    total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
+
+col7, col8 = st.columns(2)
+with col7:
+    glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
+with col8:
+    diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
+
+intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
+
+exp = st.expander("Doctor's Prescription (optional)")
+with exp:
+    manual_text = st.text_area("Paste doctor prescription text here", height=150)
 
 process_btn = st.button("🔍 Generate Diet Recommendation")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    if uploaded_file is None and manual_text.strip() == "":
-        st.warning("⚠️ Please upload a file or enter text.")
+    st.success("✅ Processing input...")
+
+    if uploaded_file:
+        text = extract_text(uploaded_file)
     else:
-        st.success("✅ Processing input...")
+        text = manual_text.strip()
 
-        if uploaded_file:
-            text = extract_text(uploaded_file)
-        else:
-            text = manual_text
+    tokens = []
+    if diabetes != "No":
+        tokens.append("diabetes")
+    if high_cholesterol == "Yes" or total_cholesterol >= 200:
+        tokens.append("cholesterol")
+    if text.strip() == "" and tokens:
+        text = " ".join(tokens)
 
-        st.subheader("📝 Extracted Text")
-        st.write(text[:1000])
+    st.subheader("📝 Extracted Text")
+    st.write(text[:1000])
 
-        st.subheader("🩺 Health Status")
-        st.info("Health condition inferred using medical text analysis.")
+    st.subheader("🩺 Health Status")
+    st.info("Health condition inferred using medical text analysis.")
 
-        diet = generate_diet(text)
+    diet = generate_diet(text)
 
-        st.subheader("🍽️ Personalized Diet Recommendation")
-        st.json(diet)
+    st.subheader("🍽️ Personalized Diet Recommendation")
+    st.json(diet)
 
-        st.download_button(
-            label="⬇️ Download Diet Plan (JSON)",
-            data=pd.Series(diet).to_json(),
-            file_name="diet_plan.json",
-            mime="application/json"
-        )
+    st.download_button(
+        label="⬇️ Download Diet Plan (JSON)",
+        data=pd.Series(diet).to_json(),
+        file_name="diet_plan.json",
+        mime="application/json"
+    )
