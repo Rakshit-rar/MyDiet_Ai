@@ -1,9 +1,18 @@
 [theme]
+# Base theme
 base = "light"
 
-primaryColor = "#38BDF8"              # Sky blue buttons & highlights
-backgroundColor = "#F9FBFD"           # Very light background
-secondaryBackgroundColor = "#E8F4FD"  # Soft sky-blue cards
-textColor = "#0F172A"                 # Dark readable text
-font = "sans serif"
+# Soft background (not pure white)
+backgroundColor = "#F7F9FC"
 
+# Card / container background
+secondaryBackgroundColor = "#FFFFFF"
+
+# Primary accent (calm green – diet/health friendly)
+primaryColor = "#5FB3A2"
+
+# Text color (soft dark, not pure black)
+textColor = "#2E3440"
+
+# Font style
+font = "sans serif"
