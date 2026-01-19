@@ -1,17 +1,18 @@
 [theme]
-base = "light"
+# Dark base for a premium look
+base = "dark"
 
-# Soft pastel background (very light blue-gray)
-backgroundColor = "#F4F7FB"
+# Main background (deep navy, not black)
+backgroundColor = "#0F172A"
 
-# Cards / containers (slight tint, not pure white)
-secondaryBackgroundColor = "#EAF2F8"
+# Cards / containers (slightly lighter for depth)
+secondaryBackgroundColor = "#1E293B"
 
-# Primary accent color (fresh teal-green)
-primaryColor = "#3BB6A5"
+# Accent color (vibrant teal-green)
+primaryColor = "#22D3EE"
 
-# Text color (dark slate, softer than black)
-textColor = "#1F2933"
+# Text color (soft off-white)
+textColor = "#E5E7EB"
 
 # Font
 font = "sans serif"
