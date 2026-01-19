@@ -1,18 +1,17 @@
 [theme]
-# Base theme
 base = "light"
 
-# Soft background (not pure white)
-backgroundColor = "#F7F9FC"
+# Soft pastel background (very light blue-gray)
+backgroundColor = "#F4F7FB"
 
-# Card / container background
-secondaryBackgroundColor = "#FFFFFF"
+# Cards / containers (slight tint, not pure white)
+secondaryBackgroundColor = "#EAF2F8"
 
-# Primary accent (calm green – diet/health friendly)
-primaryColor = "#5FB3A2"
+# Primary accent color (fresh teal-green)
+primaryColor = "#3BB6A5"
 
-# Text color (soft dark, not pure black)
-textColor = "#2E3440"
+# Text color (dark slate, softer than black)
+textColor = "#1F2933"
 
-# Font style
+# Font
 font = "sans serif"
