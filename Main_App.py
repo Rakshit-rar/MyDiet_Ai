@@ -149,7 +149,12 @@ def meal_plan_pdf(plan):
     draw = ImageDraw.Draw(img)
     max_chars = 90
     y = margin
-    line_height = font.getsize("A")[1] + 6
+    try:
+        bbox = draw.textbbox((0, 0), "A", font=font)
+        line_height = (bbox[3] - bbox[1]) + 6
+    except Exception:
+        w, h = draw.textsize("A", font=font)
+        line_height = h + 6
     for para in txt.split("\n"):
         wrapped = textwrap.wrap(para, width=max_chars) if para else [""]
         for line in wrapped:
