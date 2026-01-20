@@ -112,7 +112,7 @@ with left_col:
         type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
     )
 with right_col:
-    st.subheader("� Manual Input & Attributes")
+    st.subheader(" Manual Input & Attributes")
     exp = st.expander("Doctor's Prescription (optional)")
     with exp:
         manual_text = st.text_area("Paste doctor prescription text here", height=150)
