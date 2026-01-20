@@ -8,12 +8,12 @@ import spacy
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
-    page_title="MyDiet_AI",
+    page_title="Dummy_MyDiet_AI",
     page_icon="🍎",
     layout="centered"
 )
 
-st.title("🍎 MyDiet_AI")
+st.title("🍎 Dummy_MyDiet_AI")
 st.caption("AI-based Personalized Diet Recommendation System")
 st.markdown("---")
 
@@ -103,6 +103,42 @@ def generate_diet(text):
         "lifestyle_advice": " ".join(diet["lifestyle_advice"])
     }
 
+def generate_meal_plan(has_diabetes, has_high_cholesterol, diet_type):
+    veg = diet_type in ["Vegetarian", "Vegan"]
+    dairy_ok = diet_type != "Vegan"
+    b1 = "Oatmeal with skim milk" if dairy_ok else "Oatmeal with soy milk"
+    t1 = "green tea"
+    l1 = "Grilled chicken salad with olive oil dressing" if not veg else "Quinoa salad with legumes"
+    s1 = "Apple slices, almonds"
+    d1 = "Steamed fish with steamed vegetables" if not veg else "Grilled tofu with steamed vegetables"
+    b2 = "Vegetable smoothie" + (" and whole grain toast" if not veg else " and whole grain toast")
+    l2 = "Quinoa salad with legumes"
+    s2 = ("Low-fat yogurt, berries" if dairy_ok else "Berries with nuts")
+    d2 = "Grilled chicken with spinach" if not veg else "Grilled tofu with spinach"
+    if has_diabetes:
+        b1 = b1
+        s1 = "Apple slices, almonds"
+        s2 = s2
+    if has_high_cholesterol:
+        l1 = l1.replace("olive oil dressing", "olive oil and lemon")
+        d1 = d1
+    plan = [
+        {"breakfast": f"{b1}, {t1}", "lunch": l1, "snack": s1, "dinner": d1},
+        {"breakfast": b2, "lunch": l2, "snack": s2, "dinner": d2},
+    ]
+    return plan
+
+def meal_plan_text(plan):
+    lines = []
+    for i, day in enumerate(plan, start=1):
+        lines.append(f"Day {i}:")
+        lines.append(f"Breakfast: {day['breakfast']}")
+        lines.append(f"Lunch: {day['lunch']}")
+        lines.append(f"Snack: {day['snack']}")
+        lines.append(f"Dinner: {day['dinner']}")
+        lines.append("")
+    return "\n".join(lines).strip()
+
 # -------------------- USER INPUT UI --------------------
 left_col, right_col = st.columns(2)
 with left_col:
@@ -112,7 +148,7 @@ with left_col:
         type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
     )
 with right_col:
-    st.subheader(" Manual Input & Attributes")
+    st.subheader("� Manual Input & Attributes")
     exp = st.expander("Doctor's Prescription (optional)")
     with exp:
         manual_text = st.text_area("Paste doctor prescription text here", height=150)
@@ -137,11 +173,11 @@ with right_col:
         diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
     intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
 
-process_btn = st.button("🔍 Generate Diet plan")
+process_btn = st.button("🔍 Generate Diet Recommendation")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    st.success("✅ Processing input file...")
+    st.success("✅ Processing input...")
 
     if uploaded_file:
         text = extract_text(uploaded_file)
@@ -159,14 +195,32 @@ if process_btn:
     st.subheader("📝 Extracted Text")
     st.write(text[:1000])
 
+    st.subheader("🩺 Health Status")
+    st.info("Health condition inferred using medical text analysis.")
+
     diet = generate_diet(text)
 
-    st.subheader("🍽️ Diet plan")
+    st.subheader("🍽️ Personalized Diet Recommendation")
     st.json(diet)
+
+    mp = generate_meal_plan(diabetes != "No", high_cholesterol == "Yes" or total_cholesterol >= 200, diet_type)
+    st.subheader("📅 Daily Meal Plan")
+    for idx, day in enumerate(mp, start=1):
+        st.markdown(f"**Day {idx}**")
+        st.write(f"Breakfast: {day['breakfast']}")
+        st.write(f"Lunch: {day['lunch']}")
+        st.write(f"Snack: {day['snack']}")
+        st.write(f"Dinner: {day['dinner']}")
 
     st.download_button(
         label="⬇️ Download Diet Plan (JSON)",
         data=pd.Series(diet).to_json(),
         file_name="diet_plan.json",
         mime="application/json"
+    )
+    st.download_button(
+        label="⬇️ Download Meal Plan (TXT)",
+        data=meal_plan_text(mp),
+        file_name="meal_plan.txt",
+        mime="text/plain"
     )
