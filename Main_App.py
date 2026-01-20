@@ -196,7 +196,17 @@ if process_btn:
     diet = generate_diet(text)
 
     st.subheader("🍽️ Personalized Diet plan")
-    st.json(diet)
+    st.write(f"Condition: {diet['condition']}")
+    st.markdown("Allowed Foods:")
+    for item in diet["allowed_foods"]:
+        st.markdown(f"- {item}")
+    st.markdown("Restricted Foods:")
+    for item in diet["restricted_foods"]:
+        st.markdown(f"- {item}")
+    st.markdown("Diet Plan:")
+    st.write(diet["diet_plan"])
+    st.markdown("Lifestyle Advice:")
+    st.write(diet["lifestyle_advice"])
 
     mp = generate_meal_plan(diabetes != "No", total_cholesterol >= 200, diet_type)
     st.subheader("📅 Daily Meal Plan")
