@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import pdfplumber
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+import io
+import textwrap
 import re
 import spacy
 
@@ -138,6 +140,27 @@ def meal_plan_text(plan):
         lines.append(f"Dinner: {day['dinner']}")
         lines.append("")
     return "\n".join(lines).strip()
+def meal_plan_pdf(plan):
+    txt = meal_plan_text(plan)
+    font = ImageFont.load_default()
+    width, height = 800, 1100
+    margin = 40
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+    max_chars = 90
+    y = margin
+    line_height = font.getsize("A")[1] + 6
+    for para in txt.split("\n"):
+        wrapped = textwrap.wrap(para, width=max_chars) if para else [""]
+        for line in wrapped:
+            if y + line_height > height - margin:
+                break
+            draw.text((margin, y), line, fill="black", font=font)
+            y += line_height
+        y += 2
+    buf = io.BytesIO()
+    img.save(buf, format="PDF")
+    return buf.getvalue()
 
 # -------------------- USER INPUT UI --------------------
 left_col, right_col = st.columns(2)
@@ -224,8 +247,8 @@ if process_btn:
         mime="application/json"
     )
     st.download_button(
-        label="⬇️ Download Meal Plan (TXT)",
-        data=meal_plan_text(mp),
-        file_name="meal_plan.txt",
-        mime="text/plain"
+        label="⬇️ Download Meal Plan (PDF)",
+        data=meal_plan_pdf(mp),
+        file_name="meal_plan.pdf",
+        mime="application/pdf"
     )
