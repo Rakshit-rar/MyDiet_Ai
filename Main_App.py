@@ -108,27 +108,51 @@ def generate_diet(text):
 def generate_meal_plan(has_diabetes, has_high_cholesterol, diet_type):
     veg = diet_type in ["Vegetarian", "Vegan"]
     dairy_ok = diet_type != "Vegan"
-    b1 = "Oatmeal with skim milk" if dairy_ok else "Oatmeal with soy milk"
-    t1 = "green tea"
-    l1 = "Grilled chicken salad with olive oil dressing" if not veg else "Quinoa salad with legumes"
-    s1 = "Apple slices, almonds"
-    d1 = "Steamed fish with steamed vegetables" if not veg else "Grilled tofu with steamed vegetables"
-    b2 = "Vegetable smoothie" + (" and whole grain toast" if not veg else " and whole grain toast")
-    l2 = "Quinoa salad with legumes"
-    s2 = ("Low-fat yogurt, berries" if dairy_ok else "Berries with nuts")
-    d2 = "Grilled chicken with spinach" if not veg else "Grilled tofu with spinach"
+    day1_b = ("Oatmeal with skim milk" if dairy_ok else "Oatmeal with soy milk") + ", green tea"
+    day1_l = "Grilled chicken salad with olive oil and lemon" if not veg else "Quinoa salad with legumes"
+    day1_s = "Apple slices, almonds"
+    day1_d = "Steamed fish with steamed vegetables" if not veg else "Grilled tofu with steamed vegetables"
+    day2_b = "Vegetable smoothie and whole grain toast"
+    day2_l = "Quinoa salad with legumes"
+    day2_s = ("Low-fat yogurt, berries" if dairy_ok else "Berries with nuts")
+    day2_d = "Grilled chicken with spinach" if not veg else "Grilled tofu with spinach"
+    day3_b = "Besan chilla with mint chutney, herbal tea" if veg else "Egg-white omelet with veggies, herbal tea"
+    day3_l = "Dal, brown rice, mixed vegetables"
+    day3_s = "Carrot sticks, hummus"
+    day3_d = "Vegetable curry with cauliflower rice"
+    day4_b = ("Greek yogurt parfait with chia and berries" if dairy_ok else "Soy yogurt parfait with chia and berries")
+    day4_l = "Chickpea salad wrap with lettuce and tomato"
+    day4_s = "Roasted chana, walnuts"
+    day4_d = "Lentil soup with whole grain bread"
+    day5_b = "Upma with vegetables, green tea"
+    day5_l = "Stir-fry vegetables with tofu and brown rice" if veg else "Stir-fry vegetables with grilled chicken and brown rice"
+    day5_s = "Fruit with peanut butter"
+    day5_d = "Khichdi with cucumber salad"
+    day6_b = "Idli with sambar, herbal tea"
+    day6_l = "Hummus sandwich with whole grain bread and salad"
+    day6_s = ("Cottage cheese cubes, cherry tomatoes" if dairy_ok else "Tofu cubes, cherry tomatoes")
+    day6_d = "Baked salmon with asparagus" if not veg else "Baked tofu with asparagus"
+    day7_b = "Peanut butter banana toast, green tea"
+    day7_l = "Mixed bean salad with olive oil and lemon"
+    day7_s = "Nuts and seeds trail mix"
+    day7_d = "Whole wheat roti with dal and sautéed greens"
     if has_diabetes:
-        b1 = b1
-        s1 = "Apple slices, almonds"
-        s2 = s2
+        day2_s = day2_s
+        day4_b = day4_b
+        day5_b = day5_b
+        day7_b = day7_b
     if has_high_cholesterol:
-        l1 = l1.replace("olive oil dressing", "olive oil and lemon")
-        d1 = d1
-    plan = [
-        {"breakfast": f"{b1}, {t1}", "lunch": l1, "snack": s1, "dinner": d1},
-        {"breakfast": b2, "lunch": l2, "snack": s2, "dinner": d2},
+        day1_l = day1_l
+        day7_l = day7_l
+    return [
+        {"breakfast": day1_b, "lunch": day1_l, "snack": day1_s, "dinner": day1_d},
+        {"breakfast": day2_b, "lunch": day2_l, "snack": day2_s, "dinner": day2_d},
+        {"breakfast": day3_b, "lunch": day3_l, "snack": day3_s, "dinner": day3_d},
+        {"breakfast": day4_b, "lunch": day4_l, "snack": day4_s, "dinner": day4_d},
+        {"breakfast": day5_b, "lunch": day5_l, "snack": day5_s, "dinner": day5_d},
+        {"breakfast": day6_b, "lunch": day6_l, "snack": day6_s, "dinner": day6_d},
+        {"breakfast": day7_b, "lunch": day7_l, "snack": day7_s, "dinner": day7_d},
     ]
-    return plan
 
 def meal_plan_text(plan):
     lines = []
@@ -145,26 +169,36 @@ def meal_plan_pdf(plan):
     font = ImageFont.load_default()
     width, height = 800, 1100
     margin = 40
-    img = Image.new("RGB", (width, height), "white")
-    draw = ImageDraw.Draw(img)
     max_chars = 90
-    y = margin
     try:
-        bbox = draw.textbbox((0, 0), "A", font=font)
+        tmp = Image.new("RGB", (width, height), "white")
+        draw_tmp = ImageDraw.Draw(tmp)
+        bbox = draw_tmp.textbbox((0, 0), "A", font=font)
         line_height = (bbox[3] - bbox[1]) + 6
     except Exception:
-        w, h = draw.textsize("A", font=font)
+        tmp = Image.new("RGB", (width, height), "white")
+        draw_tmp = ImageDraw.Draw(tmp)
+        w, h = draw_tmp.textsize("A", font=font)
         line_height = h + 6
+    lines = []
     for para in txt.split("\n"):
         wrapped = textwrap.wrap(para, width=max_chars) if para else [""]
-        for line in wrapped:
-            if y + line_height > height - margin:
-                break
-            draw.text((margin, y), line, fill="black", font=font)
-            y += line_height
-        y += 2
+        lines.extend(wrapped + [""])
+    pages = []
+    y = margin
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+    for line in lines:
+        if y + line_height > height - margin:
+            pages.append(img)
+            img = Image.new("RGB", (width, height), "white")
+            draw = ImageDraw.Draw(img)
+            y = margin
+        draw.text((margin, y), line, fill="black", font=font)
+        y += line_height
+    pages.append(img)
     buf = io.BytesIO()
-    img.save(buf, format="PDF")
+    pages[0].save(buf, format="PDF", save_all=True, append_images=pages[1:])
     return buf.getvalue()
 
 # -------------------- USER INPUT UI --------------------
