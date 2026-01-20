@@ -149,9 +149,6 @@ with left_col:
     )
 with right_col:
     st.subheader("Manual Input & Attributes")
-    exp = st.expander("Doctor's Prescription (optional)")
-    with exp:
-        manual_text = st.text_area("Paste doctor prescription text here", height=150)
     col1, col2, col3 = st.columns(3)
     with col1:
         gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
@@ -159,19 +156,20 @@ with right_col:
         activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
     with col3:
         diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
-    col4, col5, col6 = st.columns(3)
+    col4, col5 = st.columns(2)
     with col4:
-        high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
-    with col5:
         bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
-    with col6:
+    with col5:
         total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
-    col7, col8 = st.columns(2)
-    with col7:
+    col6, col7 = st.columns(2)
+    with col6:
         glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
-    with col8:
+    with col7:
         diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
     intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
+    exp = st.expander("Doctor's Prescription (optional)")
+    with exp:
+        manual_text = st.text_area("Paste doctor prescription text here", height=150)
 
 process_btn = st.button("🔍 Generate Diet plan")
 
@@ -187,7 +185,7 @@ if process_btn:
     tokens = []
     if diabetes != "No":
         tokens.append("diabetes")
-    if high_cholesterol == "Yes" or total_cholesterol >= 200:
+    if total_cholesterol >= 200:
         tokens.append("cholesterol")
     if text.strip() == "" and tokens:
         text = " ".join(tokens)
@@ -200,7 +198,7 @@ if process_btn:
     st.subheader("🍽️ Personalized Diet plan")
     st.json(diet)
 
-    mp = generate_meal_plan(diabetes != "No", high_cholesterol == "Yes" or total_cholesterol >= 200, diet_type)
+    mp = generate_meal_plan(diabetes != "No", total_cholesterol >= 200, diet_type)
     st.subheader("📅 Daily Meal Plan")
     for idx, day in enumerate(mp, start=1):
         st.markdown(f"**Day {idx}**")
