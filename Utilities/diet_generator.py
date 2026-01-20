@@ -1,7 +1,3 @@
-diet generator
-
-
-
 def generate_diet(text):
     text = text.lower()
 
@@ -31,3 +27,4 @@ def generate_diet(text):
         diet["diet_plan"] = "Maintain a balanced and healthy diet."
 
     return diet
+
