@@ -141,7 +141,7 @@ process_btn = st.button("🔍 Generate Diet Recommendation")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    st.success("✅ Processing input...")
+    st.success("✅ Processing input file...")
 
     if uploaded_file:
         text = extract_text(uploaded_file)
