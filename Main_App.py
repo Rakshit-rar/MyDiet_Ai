@@ -8,12 +8,12 @@ import spacy
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
-    page_title="MyDiet_AI",
+    page_title="Dummy_MyDiet_AI",
     page_icon="🍎",
     layout="centered"
 )
 
-st.title("🍎 MyDiet_AI")
+st.title("🍎 Dummy_MyDiet_AI")
 st.caption("AI-based Personalized Diet Recommendation System")
 st.markdown("---")
 
@@ -104,41 +104,38 @@ def generate_diet(text):
     }
 
 # -------------------- USER INPUT UI --------------------
-st.subheader("📄 Upload Medical Report")
-
-uploaded_file = st.file_uploader(
-    "Upload PDF / Image / TXT / CSV",
-    type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
-)
-
-st.subheader("👤 Patient Attributes")
-col1, col2, col3 = st.columns(3)
-with col1:
-    gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
-with col2:
-    activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
-with col3:
-    diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
-
-col4, col5, col6 = st.columns(3)
-with col4:
-    high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
-with col5:
-    bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
-with col6:
-    total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
-
-col7, col8 = st.columns(2)
-with col7:
-    glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
-with col8:
-    diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
-
-intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
-
-exp = st.expander("Doctor's Prescription (optional)")
-with exp:
-    manual_text = st.text_area("Paste doctor prescription text here", height=150)
+left_col, right_col = st.columns(2)
+with left_col:
+    st.subheader("📄 Upload Medical Report")
+    uploaded_file = st.file_uploader(
+        "Upload PDF / Image / TXT / CSV",
+        type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
+    )
+with right_col:
+    st.subheader("� Manual Input & Attributes")
+    exp = st.expander("Doctor's Prescription (optional)")
+    with exp:
+        manual_text = st.text_area("Paste doctor prescription text here", height=150)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
+    with col2:
+        activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
+    with col3:
+        diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
+    with col5:
+        bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
+    with col6:
+        total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
+    col7, col8 = st.columns(2)
+    with col7:
+        glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
+    with col8:
+        diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
+    intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
 
 process_btn = st.button("🔍 Generate Diet Recommendation")
 
