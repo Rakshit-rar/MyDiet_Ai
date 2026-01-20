@@ -10,7 +10,32 @@ import spacy
 import json
 from Utilities.diet_extractor import extract_text as util_extract_text
 from Utilities.diet_generator import generate_diet as util_generate_diet
-from Utilities.ML_predictor import predict_condition
+def safe_predict_condition(numeric_data):
+    try:
+        import pandas as pd
+        from joblib import load
+        from pathlib import Path
+        model_path = Path(__file__).resolve().parent / "ML_model" / "ML_model.pkl"
+        model = load(str(model_path))
+        features = ["age", "glucose", "cholesterol", "blood_pressure", "bmi"]
+        X = pd.DataFrame([[numeric_data[f] for f in features]], columns=features)
+        pred = model.predict(X)[0]
+        return "Abnormal" if int(pred) == 1 else "Normal"
+    except Exception:
+        gl = numeric_data.get("glucose")
+        chol = numeric_data.get("cholesterol")
+        bp = numeric_data.get("blood_pressure")
+        bmi = numeric_data.get("bmi")
+        flags = 0
+        if gl is not None and gl >= 126:
+            flags += 1
+        if chol is not None and chol >= 240:
+            flags += 1
+        if bp is not None and bp >= 140:
+            flags += 1
+        if bmi is not None and bmi >= 30:
+            flags += 1
+        return "Abnormal" if flags >= 1 else "Normal"
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
@@ -266,7 +291,7 @@ if process_btn:
     diet = util_generate_diet(text)
     ml_pred = None
     if has_required_numeric_data(numeric_data):
-        ml_pred = predict_condition(numeric_data)
+        ml_pred = safe_predict_condition(numeric_data)
 
     st.subheader("🍽️ Personalized Diet plan")
     st.write(f"Condition: {diet['condition']}")
