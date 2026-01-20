@@ -159,9 +159,6 @@ if process_btn:
     st.subheader("📝 Extracted Text")
     st.write(text[:1000])
 
-    """st.subheader("🩺 Health Status")
-    st.info("Health condition inferred using medical text analysis.")"""
-
     diet = generate_diet(text)
 
     st.subheader("🍽️ Diet plan")
