@@ -137,7 +137,7 @@ with right_col:
         diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
     intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
 
-process_btn = st.button("🔍 Generate Diet Recommendation")
+process_btn = st.button("🔍 Generate Diet plan")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
