@@ -8,12 +8,12 @@ import spacy
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
-    page_title="MyDiet_AI",
+    page_title="MyDiet_AI qwer",
     page_icon="🍎",
     layout="centered"
 )
 
-st.title("🍎 MyDiet_AI")
+st.title("🍎 MyDiet_AI qwer")
 st.caption("AI-based Personalized Diet Recommendation System")
 st.markdown("---")
 
