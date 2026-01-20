@@ -6,3 +6,4 @@ pdfplumber
 pytesseract
 Pillow
 spacy
+requests
