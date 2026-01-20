@@ -1,3 +1,7 @@
+
+raw 2
+
+
 import streamlit as st
 import pandas as pd
 import pdfplumber
@@ -8,34 +12,6 @@ import textwrap
 import re
 import spacy
 import json
-from Utilities.diet_extractor import extract_text as util_extract_text
-from Utilities.diet_generator import generate_diet as util_generate_diet
-def safe_predict_condition(numeric_data):
-    try:
-        import pandas as pd
-        from joblib import load
-        from pathlib import Path
-        model_path = Path(__file__).resolve().parent / "ML_model" / "ML_model.pkl"
-        model = load(str(model_path))
-        features = ["age", "glucose", "cholesterol", "blood_pressure", "bmi"]
-        X = pd.DataFrame([[numeric_data[f] for f in features]], columns=features)
-        pred = model.predict(X)[0]
-        return "Abnormal" if int(pred) == 1 else "Normal"
-    except Exception:
-        gl = numeric_data.get("glucose")
-        chol = numeric_data.get("cholesterol")
-        bp = numeric_data.get("blood_pressure")
-        bmi = numeric_data.get("bmi")
-        flags = 0
-        if gl is not None and gl >= 126:
-            flags += 1
-        if chol is not None and chol >= 240:
-            flags += 1
-        if bp is not None and bp >= 140:
-            flags += 1
-        if bmi is not None and bmi >= 30:
-            flags += 1
-        return "Abnormal" if flags >= 1 else "Normal"
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
@@ -229,9 +205,6 @@ def meal_plan_pdf(plan):
     buf = io.BytesIO()
     pages[0].save(buf, format="PDF", save_all=True, append_images=pages[1:])
     return buf.getvalue()
-def has_required_numeric_data(d):
-    req = ["age", "glucose", "cholesterol", "blood_pressure", "bmi"]
-    return d is not None and all(k in d and d[k] is not None for k in req)
 
 # -------------------- USER INPUT UI --------------------
 left_col, right_col = st.columns(2)
@@ -272,10 +245,9 @@ if process_btn:
     st.success("✅ Processing input file...")
 
     if uploaded_file:
-        text, numeric_data = util_extract_text(uploaded_file)
+        text = extract_text(uploaded_file)
     else:
         text = manual_text.strip()
-        numeric_data = None
 
     tokens = []
     if diabetes != "No":
@@ -288,15 +260,10 @@ if process_btn:
     st.subheader("📝 Extracted Text")
     st.write(text[:1000])
     
-    diet = util_generate_diet(text)
-    ml_pred = None
-    if has_required_numeric_data(numeric_data):
-        ml_pred = safe_predict_condition(numeric_data)
+    diet = generate_diet(text)
 
     st.subheader("🍽️ Personalized Diet plan")
     st.write(f"Condition: {diet['condition']}")
-    if ml_pred is not None:
-        st.markdown(f"ML Prediction: {ml_pred}")
     st.markdown("Allowed Foods:")
     for item in diet["allowed_foods"]:
         st.markdown(f"- {item}")
