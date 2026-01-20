@@ -164,7 +164,7 @@ if process_btn:
 
     diet = generate_diet(text)
 
-    st.subheader("🍽️ Personalized Diet Recommendation")
+    st.subheader("🍽️ Diet plan")
     st.json(diet)
 
     st.download_button(
