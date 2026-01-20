@@ -7,6 +7,7 @@ import io
 import textwrap
 import re
 import spacy
+import json
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
@@ -281,7 +282,7 @@ if process_btn:
 
     st.download_button(
         label="⬇️ Download Diet Plan (JSON)",
-        data=pd.Series(diet).to_json(),
+        data=json.dumps({"diet": diet, "weekly_meal_plan": mp}, indent=2),
         file_name="diet_plan.json",
         mime="application/json"
     )
