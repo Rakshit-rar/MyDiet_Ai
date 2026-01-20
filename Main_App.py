@@ -8,6 +8,9 @@ import textwrap
 import re
 import spacy
 import json
+from Utilities.diet_extractor import extract_text as util_extract_text
+from Utilities.diet_generator import generate_diet as util_generate_diet
+from Utilities.ML_predictor import predict_condition
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
@@ -201,6 +204,9 @@ def meal_plan_pdf(plan):
     buf = io.BytesIO()
     pages[0].save(buf, format="PDF", save_all=True, append_images=pages[1:])
     return buf.getvalue()
+def has_required_numeric_data(d):
+    req = ["age", "glucose", "cholesterol", "blood_pressure", "bmi"]
+    return d is not None and all(k in d and d[k] is not None for k in req)
 
 # -------------------- USER INPUT UI --------------------
 left_col, right_col = st.columns(2)
@@ -241,9 +247,10 @@ if process_btn:
     st.success("✅ Processing input file...")
 
     if uploaded_file:
-        text = extract_text(uploaded_file)
+        text, numeric_data = util_extract_text(uploaded_file)
     else:
         text = manual_text.strip()
+        numeric_data = None
 
     tokens = []
     if diabetes != "No":
@@ -256,10 +263,15 @@ if process_btn:
     st.subheader("📝 Extracted Text")
     st.write(text[:1000])
     
-    diet = generate_diet(text)
+    diet = util_generate_diet(text)
+    ml_pred = None
+    if has_required_numeric_data(numeric_data):
+        ml_pred = predict_condition(numeric_data)
 
     st.subheader("🍽️ Personalized Diet plan")
     st.write(f"Condition: {diet['condition']}")
+    if ml_pred is not None:
+        st.markdown(f"ML Prediction: {ml_pred}")
     st.markdown("Allowed Foods:")
     for item in diet["allowed_foods"]:
         st.markdown(f"- {item}")
