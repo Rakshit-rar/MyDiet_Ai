@@ -2,6 +2,7 @@ import pdfplumber
 import pytesseract
 from PIL import Image
 import pandas as pd
+import io
 
 def extract_text(uploaded_file):
     text = ""
@@ -29,7 +30,14 @@ def extract_text(uploaded_file):
     elif file_type in ["png", "jpg", "jpeg"]:
         try:
             image = Image.open(uploaded_file)
-            text = pytesseract.image_to_string(image)
+            if image.mode != "L":
+                image = image.convert("L")
+            w, h = image.size
+            if w < 1200:
+                scale = 1200 / float(w)
+                image = image.resize((int(w * scale), int(h * scale)))
+            image = image.point(lambda p: 255 if p > 180 else 0)
+            text = pytesseract.image_to_string(image, config="--psm 6")
             if not text.strip():
                 text = (
                     "⚠️ OCR produced empty text.\n"
