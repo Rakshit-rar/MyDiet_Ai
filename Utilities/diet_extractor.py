@@ -1,7 +1,3 @@
-diet extractor
-
-
-
 import pdfplumber
 import pytesseract
 from PIL import Image
@@ -30,3 +26,4 @@ def extract_text(uploaded_file):
         numeric_data = df.iloc[0].to_dict()
 
     return text, numeric_data
+
