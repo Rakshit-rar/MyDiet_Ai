@@ -10,12 +10,32 @@ import spacy
 st.set_page_config(
     page_title="MyDiet_AI",
     page_icon="🍎",
-    layout="centered"
+    layout="wide"
 )
-
-st.title("🍎 MyDiet_AI")
-st.caption("AI-based Personalized Diet Recommendation System")
-st.markdown("---")
+st.markdown(
+    """
+    <style>
+    .stApp {background: linear-gradient(180deg, #f8fafc 0%, #ffffff 70%);}
+    .app-header {padding: 22px 24px; border-radius: 16px; background:#0f172a; color:#fff; margin-bottom: 10px;}
+    .app-header .brand {font-size: 26px; font-weight: 800; letter-spacing:.25px;}
+    .app-header .subtitle {margin-top:6px; opacity:.88}
+    .app-header .steps {display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .app-header .step {background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); padding:8px 12px; border-radius:10px; font-size:14px;}
+    .app-footer {margin-top:32px; padding:14px; border-top:1px solid #e5e7eb; color:#64748b; text-align:center; font-size:13px;}
+    </style>
+    <div class="app-header">
+      <div class="brand">🍎 MyDiet_AI</div>
+      <div class="subtitle">AI-based Personalized Diet Recommendation System</div>
+      <div class="steps">
+        <div class="step">1. Upload report or CSV (doctor_prescription)</div>
+        <div class="step">2. Set patient attributes</div>
+        <div class="step">3. Generate plan and download</div>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+st.divider()
 
 # -------------------- LOAD NLP SAFELY --------------------
 @st.cache_resource
@@ -139,85 +159,80 @@ def meal_plan_text(plan):
         lines.append("")
     return "\n".join(lines).strip()
 
-# -------------------- USER INPUT UI --------------------
-left_col, right_col = st.columns(2)
-with left_col:
-    st.subheader("📄 Upload Medical Report")
-    uploaded_file = st.file_uploader(
-        "Upload PDF / Image / TXT / CSV",
-        type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
-    )
-with right_col:
-    st.subheader("Manual Input & Attributes")
-    exp = st.expander("Doctor's Prescription (optional)")
-    with exp:
-        manual_text = st.text_area("Paste doctor prescription text here", height=150)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
-    with col2:
-        activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
-    with col3:
-        diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
-    col4, col5, col6 = st.columns(3)
-    with col4:
-        high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
-    with col5:
-        bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
-    with col6:
-        total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
-    col7, col8 = st.columns(2)
-    with col7:
-        glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
-    with col8:
-        diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
-    intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
-
-process_btn = st.button("🔍 Generate Diet plan")
+tabs = st.tabs(["Input", "Output"])
+with tabs[0]:
+    left_col, right_col = st.columns(2)
+    with left_col:
+        st.subheader("📄 Upload Medical Report")
+        uploaded_file = st.file_uploader(
+            "Upload PDF / Image / TXT / CSV",
+            type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
+        )
+    with right_col:
+        st.subheader("Manual Input & Attributes")
+        exp = st.expander("Doctor's Prescription (optional)")
+        with exp:
+            manual_text = st.text_area("Paste doctor prescription text here", height=150)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
+        with col2:
+            activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
+        with col3:
+            diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
+        col4, col5, col6 = st.columns(3)
+        with col4:
+            high_cholesterol = st.selectbox("High Cholesterol", ["No", "Yes"])
+        with col5:
+            bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
+        with col6:
+            total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
+        col7, col8 = st.columns(2)
+        with col7:
+            glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
+        with col8:
+            diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
+        intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
+    st.divider()
+    process_btn = st.button("🔍 Generate Diet plan")
 
 # -------------------- PIPELINE EXECUTION --------------------
-if process_btn:
-    st.success("✅ Processing input file...")
-
-    if uploaded_file:
-        text = extract_text(uploaded_file)
-    else:
-        text = manual_text.strip()
-
-    tokens = []
-    if diabetes != "No":
-        tokens.append("diabetes")
-    if high_cholesterol == "Yes" or total_cholesterol >= 200:
-        tokens.append("cholesterol")
-    if text.strip() == "" and tokens:
-        text = " ".join(tokens)
-
-    st.subheader("📝 Extracted Text")
-    st.write(text[:1000])
-    
-    diet = generate_diet(text)
-
-    st.subheader("🍽️ Personalized Diet plan")
-    st.json(diet)
-
-    mp = generate_meal_plan(diabetes != "No", high_cholesterol == "Yes" or total_cholesterol >= 200, diet_type)
-    st.subheader("📅 Daily Meal Plan")
-    for idx, day in enumerate(mp, start=1):
-        st.markdown(f"**Day {idx}**")
-        st.write(f"Breakfast: {day['breakfast']}")
-        st.write(f"Lunch: {day['lunch']}")
-        st.write(f"Snack: {day['snack']}")
-        st.write(f"Dinner: {day['dinner']}")
-
-    st.download_button(
-        label="⬇️ Download Diet Plan (JSON)",
-        data=pd.Series(diet).to_json(),
-        file_name="diet_plan.json",
-        mime="application/json"
-    )
-    st.download_button(
-        label="⬇️ Download Meal Plan (TXT)",
-        data=meal_plan_text(mp),
-        file_name="meal_plan.txt",
-        mime="text/plain"
-    )
+with tabs[1]:
+    if 'process_btn' in locals() and process_btn:
+        st.success("✅ Processing input file...")
+        if uploaded_file:
+            text = extract_text(uploaded_file)
+        else:
+            text = manual_text.strip()
+        tokens = []
+        if diabetes != "No":
+            tokens.append("diabetes")
+        if high_cholesterol == "Yes" or total_cholesterol >= 200:
+            tokens.append("cholesterol")
+        if text.strip() == "" and tokens:
+            text = " ".join(tokens)
+        st.subheader("📝 Extracted Text")
+        st.write(text[:1000])
+        diet = generate_diet(text)
+        st.subheader("🍽️ Personalized Diet plan")
+        st.json(diet)
+        mp = generate_meal_plan(diabetes != "No", high_cholesterol == "Yes" or total_cholesterol >= 200, diet_type)
+        st.subheader("📅 Daily Meal Plan")
+        for idx, day in enumerate(mp, start=1):
+            st.markdown(f"**Day {idx}**")
+            st.write(f"Breakfast: {day['breakfast']}")
+            st.write(f"Lunch: {day['lunch']}")
+            st.write(f"Snack: {day['snack']}")
+            st.write(f"Dinner: {day['dinner']}")
+        st.download_button(
+            label="⬇️ Download Diet Plan (JSON)",
+            data=pd.Series(diet).to_json(),
+            file_name="diet_plan.json",
+            mime="application/json"
+        )
+        st.download_button(
+            label="⬇️ Download Meal Plan (TXT)",
+            data=meal_plan_text(mp),
+            file_name="meal_plan.txt",
+            mime="text/plain"
+        )
