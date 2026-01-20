@@ -148,7 +148,7 @@ with left_col:
         type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
     )
 with right_col:
-    st.subheader("� Manual Input & Attributes")
+    st.subheader("Manual Input & Attributes")
     exp = st.expander("Doctor's Prescription (optional)")
     with exp:
         manual_text = st.text_area("Paste doctor prescription text here", height=150)
@@ -177,7 +177,7 @@ process_btn = st.button("🔍 Generate Diet Recommendation")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    st.success("✅ Processing input...")
+    st.success("✅ Processing input file...")
 
     if uploaded_file:
         text = extract_text(uploaded_file)
@@ -200,7 +200,7 @@ if process_btn:
 
     diet = generate_diet(text)
 
-    st.subheader("🍽️ Personalized Diet Recommendation")
+    st.subheader("🍽️ Personalized Diet plan")
     st.json(diet)
 
     mp = generate_meal_plan(diabetes != "No", high_cholesterol == "Yes" or total_cholesterol >= 200, diet_type)
