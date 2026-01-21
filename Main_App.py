@@ -42,12 +42,108 @@ def safe_predict_condition(numeric_data):
 st.set_page_config(
     page_title="MyDiet_AI",
     page_icon="🍎",
-    layout="centered"
+    layout="wide"
 )
 
-st.title("🍎 MyDiet_AI")
-st.caption("AI-based Personalized Diet Recommendation System")
-st.markdown("---")
+# -------------------- CUSTOM CSS & STYLING --------------------
+st.markdown("""
+<style>
+    /* Global Settings */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    /* Background */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* Header Styling */
+    .main-header {
+        background: linear-gradient(90deg, #FF4B2B 0%, #FF416C 100%);
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .main-header h1 {
+        color: white !important;
+        font-weight: 700;
+        font-size: 3.5rem;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .main-header p {
+        font-size: 1.2rem;
+        opacity: 0.95;
+        margin-top: 1rem;
+        font-weight: 300;
+    }
+
+    /* Cards/Containers */
+    .css-1r6slb0, .css-12oz5g7 {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    /* Button Styling */
+    .stButton>button {
+        background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(56, 239, 125, 0.5);
+    }
+    
+    /* Typography */
+    h2 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #38ef7d;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+    h3 {
+        color: #34495e;
+        margin-top: 1.5rem;
+    }
+    
+    /* Result Cards */
+    .result-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        border-left: 5px solid #38ef7d;
+    }
+    
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------- HERO SECTION --------------------
+st.markdown("""
+<div class="main-header">
+    <h1>🍎 MyDiet_AI</h1>
+    <p>Your Personalized AI Nutritionist & Diet Planner</p>
+</div>
+""", unsafe_allow_html=True)
 
 # -------------------- LOAD NLP SAFELY --------------------
 @st.cache_resource
@@ -495,101 +591,152 @@ def has_required_numeric_data(d):
     return d is not None and all(k in d and d[k] is not None for k in req)
 
 # -------------------- USER INPUT UI --------------------
-left_col, right_col = st.columns(2)
-with left_col:
-    st.subheader("📄 Upload Medical Report")
-    uploaded_file = st.file_uploader(
-        "Upload PDF / Image / TXT / CSV",
-        type=["pdf", "png", "jpg", "jpeg", "txt", "csv"]
-    )
-with right_col:
-    st.subheader("Manual Input & Attributes")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
-    with col2:
-        activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
-    with col3:
-        diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
-    col4, col5 = st.columns(2)
-    with col4:
-        bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
-    with col5:
-        total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
-    col6, col7 = st.columns(2)
-    with col6:
-        glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
-    with col7:
-        diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
-    intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
-    exp = st.expander("Doctor's Prescription (optional)")
-    with exp:
-        manual_text = st.text_area("Paste doctor prescription text here", height=150)
+st.markdown("## 📋 Patient Data & Preferences")
 
-process_btn = st.button("🔍 Generate Diet plan")
+input_container = st.container()
+with input_container:
+    col1, col2 = st.columns([1, 1.5], gap="large")
+    
+    with col1:
+        st.markdown("### � Upload Medical Report")
+        st.info("Supported formats: PDF, JPG, PNG, TXT, CSV")
+        uploaded_file = st.file_uploader(
+            "Upload your file here",
+            type=["pdf", "png", "jpg", "jpeg", "txt", "csv"],
+            label_visibility="collapsed"
+        )
+        
+    with col2:
+        st.markdown("### 📝 Manual Details")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            gender = st.selectbox("Gender", ["Select", "Male", "Female", "Other"], index=0)
+        with c2:
+            activity_level = st.selectbox("Activity Level", ["Select", "Sedentary", "Low", "Moderate", "Active", "High"], index=0)
+        with c3:
+            diabetes = st.selectbox("Diabetes", ["No", "Yes", "Type 1", "Type 2"])
+            
+        c4, c5 = st.columns(2)
+        with c4:
+            bmi = st.number_input("BMI", min_value=10.0, max_value=60.0, value=24.0, step=0.1)
+        with c5:
+            total_cholesterol = st.number_input("Total Cholesterol (mg/dL)", min_value=100.0, max_value=400.0, value=180.0, step=1.0)
+            
+        c6, c7 = st.columns(2)
+        with c6:
+            glucose = st.number_input("Glucose (mg/dL)", min_value=50.0, max_value=300.0, value=100.0, step=1.0)
+        with c7:
+            diet_type = st.selectbox("Diet Type", ["Vegetarian", "Non-Vegetarian", "Vegan"])
+            
+        intolerances = st.multiselect("Intolerances", ["Lactose", "Gluten", "Nuts", "Soy", "Eggs", "Shellfish"])
+        
+        with st.expander("➕ Doctor's Prescription (Optional)"):
+            manual_text = st.text_area("Paste text here", height=100)
+
+st.markdown("<br>", unsafe_allow_html=True)
+process_btn = st.button("✨ Generate Personalized Diet Plan")
 
 # -------------------- PIPELINE EXECUTION --------------------
 if process_btn:
-    st.success("✅ Processing input file...")
+    with st.spinner("🔄 Analyzing your health profile..."):
+        if uploaded_file:
+            text, numeric_data = util_extract_text(uploaded_file)
+        else:
+            text = manual_text.strip()
+            numeric_data = None
 
-    if uploaded_file:
-        text, numeric_data = util_extract_text(uploaded_file)
-    else:
-        text = manual_text.strip()
-        numeric_data = None
+        tokens = []
+        if diabetes != "No":
+            tokens.append("diabetes")
+        if total_cholesterol >= 200:
+            tokens.append("cholesterol")
+        if text.strip() == "" and tokens:
+            text = " ".join(tokens)
 
-    tokens = []
-    if diabetes != "No":
-        tokens.append("diabetes")
-    if total_cholesterol >= 200:
-        tokens.append("cholesterol")
-    if text.strip() == "" and tokens:
-        text = " ".join(tokens)
+        # Show extracted text preview in a cleaner way
+        with st.expander("📝 View Extracted Text", expanded=False):
+            st.write(text[:1000] if text else "No text extracted.")
 
-    st.subheader("📝 Extracted Text")
-    st.write(text[:1000])
+        diet = util_generate_diet(text)
+        ml_pred = None
+        if has_required_numeric_data(numeric_data):
+            ml_pred = safe_predict_condition(numeric_data)
+
+    # Results Display
+    st.markdown("---")
+    st.markdown("## 🥗 Your Personalized Nutrition Plan")
     
-    diet = util_generate_diet(text)
-    ml_pred = None
-    if has_required_numeric_data(numeric_data):
-        ml_pred = safe_predict_condition(numeric_data)
+    # Condition & Prediction Row
+    st.markdown(f"""
+    <div class="result-card">
+        <h3>🩺 Health Analysis</h3>
+        <p><strong>Detected Condition:</strong> <span style="color: #e74c3c; font-weight: bold;">{diet['condition']}</span></p>
+        {f'<p><strong>ML Risk Assessment:</strong> <span style="color: #e67e22; font-weight: bold;">{ml_pred}</span></p>' if ml_pred else ''}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Foods Row
+    c_allow, c_restrict = st.columns(2)
+    with c_allow:
+        items = "".join([f"<li>{x}</li>" for x in diet["allowed_foods"]])
+        st.markdown(f"""
+        <div class="result-card" style="border-left: 5px solid #2ecc71;">
+            <h3 style="color: #2ecc71;">✅ Foods to Include</h3>
+            <ul style="padding-left: 20px;">{items}</ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with c_restrict:
+        items = "".join([f"<li>{x}</li>" for x in diet["restricted_foods"]])
+        st.markdown(f"""
+        <div class="result-card" style="border-left: 5px solid #e74c3c;">
+            <h3 style="color: #e74c3c;">❌ Foods to Avoid</h3>
+            <ul style="padding-left: 20px;">{items}</ul>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.subheader("🍽️ Personalized Diet plan")
-    st.write(f"Condition: {diet['condition']}")
-    if ml_pred is not None:
-        st.markdown(f"ML Prediction: {ml_pred}")
-    st.markdown("Allowed Foods:")
-    for item in diet["allowed_foods"]:
-        st.markdown(f"- {item}")
-    st.markdown("Restricted Foods:")
-    for item in diet["restricted_foods"]:
-        st.markdown(f"- {item}")
-    st.markdown("Diet Plan:")
-    st.write(diet["diet_plan"])
-    st.markdown("Lifestyle Advice:")
-    st.write(diet["lifestyle_advice"])
+    # Advice
+    st.markdown(f"""
+    <div class="result-card" style="border-left: 5px solid #3498db;">
+        <h3 style="color: #3498db;">💡 Lifestyle & Diet Advice</h3>
+        <p><strong>Diet Strategy:</strong> {diet['diet_plan']}</p>
+        <p><strong>Daily Habits:</strong> {diet['lifestyle_advice']}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
+    # Meal Plan
     cond_text = diet["condition"].lower()
     has_d = ("diabetes" in cond_text) or (diabetes != "No")
     has_c = ("cholesterol" in cond_text) or (total_cholesterol >= 200)
     mp = generate_meal_plan(has_d, has_c, diet_type)
-    st.subheader("📅 Daily Meal Plan")
+    
+    st.markdown("## 📅 7-Day Meal Schedule")
+    
     for idx, day in enumerate(mp, start=1):
-        st.markdown(f"**Day {idx}**")
-        st.write(f"Breakfast: {day['breakfast']}")
-        st.write(f"Lunch: {day['lunch']}")
-        st.write(f"Snack: {day['snack']}")
-        st.write(f"Dinner: {day['dinner']}")
+        with st.expander(f"Day {idx} - View Menu", expanded=(idx==1)):
+            st.markdown(f"""
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <p><strong>🍳 Breakfast:</strong> {day['breakfast']}</p>
+                <p><strong>🍱 Lunch:</strong> {day['lunch']}</p>
+                <p><strong>🍎 Snack:</strong> {day['snack']}</p>
+                <p><strong>🍽️ Dinner:</strong> {day['dinner']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.download_button(
-        label="⬇️ Download Diet Plan (JSON)",
-        data=json.dumps({"diet": diet, "weekly_meal_plan": mp}, indent=2),
-        file_name="diet_plan.json",
-        mime="application/json"
-    )
-    st.download_button(
-        label="⬇️ Download Meal Plan (PDF)",
-        data=meal_plan_pdf(mp),
-        file_name="meal_plan.pdf",
-        mime="application/pdf"
-    )
+    # Downloads
+    st.markdown("### 📥 Download Your Plan")
+    d1, d2 = st.columns(2)
+    with d1:
+        st.download_button(
+            label="📄 Download JSON",
+            data=json.dumps({"diet": diet, "weekly_meal_plan": mp}, indent=2),
+            file_name="diet_plan.json",
+            mime="application/json"
+        )
+    with d2:
+        st.download_button(
+            label="📑 Download PDF",
+            data=meal_plan_pdf(mp),
+            file_name="meal_plan.pdf",
+            mime="application/pdf"
+        )
