@@ -713,15 +713,29 @@ if process_btn:
     st.markdown("## 📅 7-Day Meal Schedule")
     
     for idx, day in enumerate(mp, start=1):
-        with st.expander(f"Day {idx} - View Menu", expanded=(idx==1)):
-            st.markdown(f"""
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 10px;">
-                <p><strong>🍳 Breakfast:</strong> {day['breakfast']}</p>
-                <p><strong>🍱 Lunch:</strong> {day['lunch']}</p>
-                <p><strong>🍎 Snack:</strong> {day['snack']}</p>
-                <p><strong>🍽️ Dinner:</strong> {day['dinner']}</p>
+        st.markdown(f"""
+        <div class="result-card" style="border-left: 5px solid #FF416C; margin-bottom: 20px;">
+            <h4 style="color: #2c3e50; margin-bottom: 1rem;">📅 Day {idx}</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <strong>🍳 Breakfast</strong><br>
+                    <span style="color: #555;">{day['breakfast']}</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <strong>🍱 Lunch</strong><br>
+                    <span style="color: #555;">{day['lunch']}</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <strong>🍎 Snack</strong><br>
+                    <span style="color: #555;">{day['snack']}</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <strong>🍽️ Dinner</strong><br>
+                    <span style="color: #555;">{day['dinner']}</span>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
 
     # Downloads
     st.markdown("### 📥 Download Your Plan")
